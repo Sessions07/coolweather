@@ -14,15 +14,23 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cybt.test.coolweather.db.City;
 import com.cybt.test.coolweather.db.County;
 import com.cybt.test.coolweather.db.Province;
+import com.cybt.test.coolweather.util.HttpUtil;
+import com.cybt.test.coolweather.util.Utility;
 
 import org.litepal.crud.DataSupport;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 @RequiresApi(api = Build.VERSION_CODES.HONEYCOMB)
 public class ChooseAreaFragment extends Fragment {
@@ -175,7 +183,68 @@ public class ChooseAreaFragment extends Fragment {
         }
     }
 
+    /**
+     *根据传入的地址和类型从服务器上查询省市县数据
+     */
     private void quertFromServer(String address, final String type) {
+        showProgressDialog();
+        HttpUtil.sendOkHttpRequest(address, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                //通过runOnUiThread()方法回到主线程处理逻辑
+                getActivity().runOnUiThread(new Runnable() {
+                    @RequiresApi(api = Build.VERSION_CODES.M)
+                    @Override
+                    public void run() {
+                        closeProgressDialog();
+                        Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String responseText = response.body().string();
+                boolean result = false;
+                if("province".equals(type)){
+                    result = Utility.handleProvinceReports(responseText);
+                }else if("county".equals(type)){
+                    result = Utility.handleCountyReports(responseText,selectCity.getId());
+                }else if("city".equals(type)){
+                    result = Utility.handleCitiesReports(responseText,selectProvince.getId());
+                }
+                if(result){
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            closeProgressDialog();
+                            if ("province".equals(type)){
+                                queryProvinces();
+                            }else if ("city".equals(type)){
+                                queryCities();
+                            }else if ("county".equals(type)){
+                                queryCounties();
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void closeProgressDialog() {
+        if (null != progressDialog){
+            progressDialog.dismiss();
+        }
+    }
+
+    private void showProgressDialog() {
+        if (null == progressDialog){
+            progressDialog = new ProgressDialog(getActivity());
+            progressDialog.setMessage("正在加载中……");
+            progressDialog.setCanceledOnTouchOutside(false);
+        }
+        progressDialog.show();
     }
 
 

@@ -37,7 +37,7 @@ public class Utility {
     /**
      * 解析和处理服务器返回的市级数据
      */
-    public static Boolean handleCitiesReports(String response){
+    public static Boolean handleCitiesReports(String response, int provinceId){
         if (!TextUtils.isEmpty(response)){
             try {
                 JSONArray allCities = new JSONArray(response);
@@ -46,6 +46,7 @@ public class Utility {
                     City city = new City();
                     city.setCityCode(cityObject.getInt("id"));
                     city.setCityName(cityObject.getString("name"));
+                    city.setProvinceId(provinceId);
                     city.save();
                 }
                 return true;
