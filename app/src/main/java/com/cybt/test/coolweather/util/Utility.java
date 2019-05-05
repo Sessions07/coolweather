@@ -19,13 +19,13 @@ public class Utility {
     public static Boolean handleProvinceReports(String response){
         if (!TextUtils.isEmpty(response)){
             try {
-                JSONArray allProvinces = new JSONArray(response);
+                JSONArray allProvinces = new JSONArray(response);//实例化一个json数组，response作为入参传进来
                 for (int i=0; i< allProvinces.length();i++){
-                    JSONObject provinceObject = allProvinces.getJSONObject(i);
-                    Province province = new Province();
-                    province.setProvinceCode(provinceObject.getInt("id"));
-                    province.setProvinceName(provinceObject.getString("name"));
-                    province.save();
+                    JSONObject provinceObject = allProvinces.getJSONObject(i);//遍历数组，创建一个json对象，去从数组里取数据
+                    Province province = new Province();//实例化一个省
+                    province.setProvinceCode(provinceObject.getInt("id"));//捯id
+                    province.setProvinceName(provinceObject.getString("name"));//捯名字
+                    province.save();//调用Datasupport存储方法
                 }
                 return true;
             } catch (JSONException e) {

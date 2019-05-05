@@ -4,7 +4,6 @@ import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.RequiresApi;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,12 +70,12 @@ public class ChooseAreaFragment extends Fragment {
     /**
      * 选中的省
      */
-    private Province selectProvince;
+    private Province selectedProvince;
 
     /**
      * 选中的市
      */
-    private City selectCity;
+    private City selectedCity;
 
     /**
      * 当前选中的级别
@@ -103,9 +102,10 @@ public class ChooseAreaFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (currentLevel == LEVEL_PROVINCE){
-                    selectProvince = provinceList.get(position);
+                    selectedProvince = provinceList.get(position);
                     queryCities();
                 }else if(currentLevel == LEVEL_CITY){
+                    selectedCity = cityList.get(position);
                     queryCounties();
                 }
             }
@@ -124,9 +124,9 @@ public class ChooseAreaFragment extends Fragment {
     }
 
     private void queryCounties() {
-        titleText.setText(selectCity.getCityName());
+        titleText.setText(selectedCity.getCityName());
         backButton.setVisibility(View.VISIBLE);
-        countyList = DataSupport.where("cityId = ?", String.valueOf(selectCity.getId())).find(County.class);
+        countyList = DataSupport.where("cityId = ?", String.valueOf(selectedCity.getId())).find(County.class);
         if (countyList.size() > 0){
             dataList.clear();
             for (County county : countyList){
@@ -136,17 +136,17 @@ public class ChooseAreaFragment extends Fragment {
             listview.setSelection(0);
             currentLevel = LEVEL_COUNTY;
         }else{
-            int provinceCode = selectProvince.getProvinceCode();
-            int cityCode = selectCity.getCityCode();
-            String address = "http://guolin.tech/api/china" + provinceCode + cityCode;
-            quertFromServer(address, "county");
+            int provinceCode = selectedProvince.getProvinceCode();
+            int cityCode = selectedCity.getCityCode();
+            String address = "http://guolin.tech/api/china/" + provinceCode + '/' + cityCode;
+            queryFromServer(address, "county");
         }
     }
 
     private void queryCities() {
-        titleText.setText(selectProvince.getProvinceName());
+        titleText.setText(selectedProvince.getProvinceName());
         backButton.setVisibility(View.VISIBLE);
-        cityList = DataSupport.where("provinceId = ?",String.valueOf(selectProvince.getId())).find(City.class);
+        cityList = DataSupport.where("provinceId = ?",String.valueOf(selectedProvince.getId())).find(City.class);
         if (cityList.size() > 0){
             dataList.clear();
             for (City city : cityList){
@@ -156,9 +156,9 @@ public class ChooseAreaFragment extends Fragment {
             listview.setSelection(0);
             currentLevel = LEVEL_CITY;
         }else{
-            int provinceCode = selectProvince.getProvinceCode();
-            String address = "http://guolin.tech/api/china" + provinceCode;
-            quertFromServer(address,"city");
+            int provinceCode = selectedProvince.getProvinceCode();
+            String address = "http://guolin.tech/api/china/" + provinceCode;
+            queryFromServer(address,"city");
         }
     }
 
@@ -179,14 +179,14 @@ public class ChooseAreaFragment extends Fragment {
             currentLevel = LEVEL_PROVINCE;
         }else{
             String address = "http://guolin.tech/api/china";
-            quertFromServer(address,"province");
+            queryFromServer(address,"province");
         }
     }
 
     /**
      *根据传入的地址和类型从服务器上查询省市县数据
      */
-    private void quertFromServer(String address, final String type) {
+    private void queryFromServer(String address, final String type) {
         showProgressDialog();
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
@@ -209,9 +209,9 @@ public class ChooseAreaFragment extends Fragment {
                 if("province".equals(type)){
                     result = Utility.handleProvinceReports(responseText);
                 }else if("county".equals(type)){
-                    result = Utility.handleCountyReports(responseText,selectCity.getId());
+                    result = Utility.handleCountyReports(responseText, selectedCity.getId());
                 }else if("city".equals(type)){
-                    result = Utility.handleCitiesReports(responseText,selectProvince.getId());
+                    result = Utility.handleCitiesReports(responseText, selectedProvince.getId());
                 }
                 if(result){
                     getActivity().runOnUiThread(new Runnable() {
