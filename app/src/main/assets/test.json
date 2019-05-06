@@ -1,0 +1,172 @@
+{
+  "customs": {
+    "vivo": {
+      "app_id": "100629820"
+    },
+    "vivo_ad": {
+      "app_id": "375234c29f8b4f0692149e71e58ba526",
+      "splash_title": "快乐游戏",
+      "splash_desc": "享受乐趣"
+    }
+  },
+  "events": [
+    {
+      "id": "splash",
+      "options": [
+        {
+          "type": "splash",
+          "value": "9395f76330204e9c8b8b42dd118d9d1f"
+        }
+      ]
+    },
+    {
+      "id": "bannermainmenu_auto",
+      "options": [
+        {
+          "type": "n_banner",
+          "value": "0862b51e6c0e4a7eafd342bffd429482",
+          "channel": "gudavivo",
+          "autoclick": true
+        },
+        {
+          "depend": "no",
+          "type": "banner",
+          "value": "7bc0731a7ff640498137021fff884a31",
+          "channel": "gudavivo",
+          "autoclick": true
+        },
+        {
+          "depend": "yes",
+          "type": "daily_max_count",
+          "value": "daily_banner_counter"
+        },
+        {
+          "depend": "yes",
+          "type": "redirect",
+          "value": "bannermainmenu",
+          "delay": 15000
+        },
+        {
+          "depend": "no",
+          "type": "redirect",
+          "value": "bannermainmenu",
+          "delay": 10000
+        }
+      ]
+    },
+    {
+      "id": "bannermainmenu",
+      "options": [
+        {
+          "location": "2",
+          "type": "daily_max_check",
+          "value": "daily_banner_counter|4"
+        },
+        {
+          "depend": "yes",
+          "type": "redirect",
+          "value": "bannermainmenu_auto"
+        },
+        {
+          "depend": "no",
+          "type": "banner",
+          "value": "7bc0731a7ff640498137021fff884a31"
+        },
+        {
+          "depend": "no",
+          "type": "n_banner",
+          "value": "0862b51e6c0e4a7eafd342bffd429482"
+        },
+        {
+          "depend": "yes",
+          "type": "redirect",
+          "value": "bannermainmenu",
+          "delay": 10000
+        },
+        {
+          "depend": "no",
+          "type": "redirect",
+          "value": "bannermainmenu",
+          "delay": 10000
+        }
+      ]
+    },
+    {
+      "id": "intervalmainmenu",
+      "options": []
+    },
+    {
+      "id": "intervalloading",
+      "options": []
+    },
+    {
+      "id": "intervalpausegame",
+      "options": [
+        {
+          "type": "insert",
+          "value": "1081a7130cff457d9886fdd41c1d7ba8"
+        }
+      ]
+    },
+    {
+      "id": "intervalgearchange",
+      "options": []
+    },
+    {
+      "id": "intervalgetcar",
+      "options": [
+        {
+          "type": "n_insert",
+          "value": "8f8d5de0a83f458a9c3e2931c6ae07c4",
+          "layout": "mili_insert1"
+        }
+      ]
+    },
+    {
+      "id": "intervalselectlevel",
+      "options": [
+        {
+          "type": "n_insert",
+          "value": "8f8d5de0a83f458a9c3e2931c6ae07c4",
+          "layout": "mili_insert1"
+        }
+      ]
+    },
+    {
+      "id": "intervalstageclear",
+      "options": [
+        {
+          "type": "redirect",
+          "value": "intervalpausegame"
+        }
+      ]
+    },
+    {
+      "id": "intervalfreecoin",
+      "options": [
+        {
+          "type": "redirect",
+          "value": "intervalpausegame"
+        }
+      ]
+    },
+    {
+      "id": "intervalfreeshop",
+      "options": [
+        {
+          "type": "redirect",
+          "value": "intervalpausegame"
+        }
+      ]
+    },
+    {
+      "id": "intervalexitgame",
+      "options": [
+        {
+          "type": "exit",
+          "value": "0"
+        }
+      ]
+    }
+  ]
+}
