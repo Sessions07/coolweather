@@ -5,6 +5,13 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimary">
 
+    <ImageView
+        android:id="@+id/my_pic_img"
+        android:src="@drawable/my_pic"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"/>
+
     <ScrollView
         android:id="@+id/weather_layout"
         android:layout_width="match_parent"

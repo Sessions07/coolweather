@@ -2,6 +2,7 @@ package com.cybt.test.coolweather;
 
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -104,9 +105,15 @@ public class ChooseAreaFragment extends Fragment {
                 if (currentLevel == LEVEL_PROVINCE){
                     selectedProvince = provinceList.get(position);
                     queryCities();
-                }else if(currentLevel == LEVEL_CITY){
+                }else if (currentLevel == LEVEL_CITY){
                     selectedCity = cityList.get(position);
                     queryCounties();
+                }else if (currentLevel == LEVEL_COUNTY){//如何从省市县列表跳转到天气界面
+                    String weatherId = countyList.get(position).getWeatherId(); //获取点到的位置的天气id
+                    Intent intent = new Intent(getActivity(), WeatherActivity.class);//getActivity方法可获取到该fragment所处的activity
+                    intent.putExtra("weather_id", weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });

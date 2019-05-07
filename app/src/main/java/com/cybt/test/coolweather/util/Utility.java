@@ -62,9 +62,9 @@ public class Utility {
     public static Boolean handleCountyReports(String response, int cityId){
         if (!TextUtils.isEmpty(response)){
             try {
-                JSONArray allCounty = new JSONArray(response);
-                for(int i=0;i< allCounty.length();i++){
-                    JSONObject countyObject = allCounty.getJSONObject(i);
+                JSONArray allCounties = new JSONArray(response);
+                for(int i=0;i< allCounties.length();i++){
+                    JSONObject countyObject = allCounties.getJSONObject(i);
                     County county = new County();
                     county.setCountyName(countyObject.getString("name"));
                     county.setWeatherId(countyObject.getString("weather_id"));
@@ -84,7 +84,7 @@ public class Utility {
             JSONObject jsonObject = new JSONObject(response);
             JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
             String weatherContent = jsonArray.getJSONObject(0).toString();
-            return new Gson().fromJson(weatherContent,Weather.class);//返回一个weather类
+            return new Gson().fromJson(weatherContent, Weather.class);//返回一个weather类
         } catch (JSONException e) {
             e.printStackTrace();
         }
