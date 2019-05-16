@@ -1,8 +1,12 @@
 package com.cybt.test.coolweather;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.media.Image;
+import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +23,7 @@ import com.cybt.test.coolweather.gson.Forecast;
 import com.cybt.test.coolweather.gson.Weather;
 import com.cybt.test.coolweather.util.HttpUtil;
 import com.cybt.test.coolweather.util.Utility;
+import com.google.gson.JsonObject;
 
 import org.w3c.dom.Text;
 
@@ -54,11 +59,21 @@ public class WeatherActivity extends AppCompatActivity {
 
     private TextView sportText;
 
-    private String mWeatherId;//郭霖大神github补充，第2版书上没有
+    private String mWeatherId;
+
+    public SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (Build.VERSION.SDK_INT >= 21){
+            View decorView = getWindow().getDecorView();//获取到当前活动的布局
+            int option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE|View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+            decorView.setSystemUiVisibility(option);
+            //三个Flag结合在一起使用，表示会让应用的主体内容占用系统状态栏的空间，并隐藏导航栏，最后再调用Window的setXxxBarColor方法设置成透明色就可以了。
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+            getWindow().setNavigationBarColor(Color.TRANSPARENT);
+        }
         setContentView(R.layout.activity_weather);
         //开始各种初始化
         weatherLayout = findViewById(R.id.weather_layout);
@@ -73,15 +88,22 @@ public class WeatherActivity extends AppCompatActivity {
         carWashText = findViewById(R.id.car_wash_text);
         sportText = findViewById(R.id.sport_text);
         myPicImg = findViewById(R.id.my_pic_img);
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh);
 
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = prefs.getString("weather", null);
         String myPic = prefs.getString("my_pic", null);
+        if(myPic != null){
+            Glide.with(this).load(myPic).into(myPicImg);
+        }else{
+            loadBingPic();
+        }
 
         if (weatherString != null) {
             //有缓存就直接解析天气数据
             Weather weather = Utility.handleWeatherResponse(weatherString);
-            mWeatherId = weather.basic.weatherId;//郭霖大神github补充，第2版书上没有
+            mWeatherId = weather.basic.weatherId;
             showWeatherInfo(weather);
         } else {
             //没有缓存区服务器查询天气
@@ -90,17 +112,37 @@ public class WeatherActivity extends AppCompatActivity {
             requestWeather(mWeatherId);
         }
 
-//        if (myPic != null){
-//            Glide.with(this).load(myPic).into(myPicImg);
-//        }else{
-//            loadMyPic();
-//        }
-//    }
-
-//    private void loadMyPic() {
-//    }
-//
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                requestWeather(mWeatherId);
+            }
+        });
 }
+
+    private void loadBingPic() {
+        String requestBingPic = "http://guolin.tech/api/bing_pic";
+        HttpUtil.sendOkHttpRequest(requestBingPic, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final String myPic = response.body().string();
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+                editor.putString("my_pic", myPic);
+                editor.apply();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Glide.with(WeatherActivity.this).load(myPic).into(myPicImg);
+                    }
+                });
+            }
+        });
+    }
 
     /**
      *根据天气id请求城市天气信息
@@ -116,6 +158,7 @@ public class WeatherActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Toast.makeText(WeatherActivity.this, "获取天气信息失败01", Toast.LENGTH_SHORT).show();
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 });
             }
@@ -136,12 +179,13 @@ public class WeatherActivity extends AppCompatActivity {
                         }else{
                             Toast.makeText(WeatherActivity.this, weather.aqi.city.pm25, Toast.LENGTH_SHORT).show();
                         }
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 });
             }
         });
 
-//        loadMyPic();
+        loadBingPic();
 
     }
 
