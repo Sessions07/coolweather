@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.cybt.test.coolweather.db.City;
 import com.cybt.test.coolweather.db.County;
 import com.cybt.test.coolweather.db.Province;
+import com.cybt.test.coolweather.gson.Weather;
 import com.cybt.test.coolweather.util.HttpUtil;
 import com.cybt.test.coolweather.util.Utility;
 
@@ -110,10 +111,17 @@ public class ChooseAreaFragment extends Fragment {
                     queryCounties();
                 }else if (currentLevel == LEVEL_COUNTY){//如何从省市县列表跳转到天气界面
                     String weatherId = countyList.get(position).getWeatherId(); //获取点到的位置的天气id
-                    Intent intent = new Intent(getActivity(), WeatherActivity.class);//getActivity方法可获取到该fragment所处的activity
-                    intent.putExtra("weather_id", weatherId);
-                    startActivity(intent);
-                    getActivity().finish();
+                    if (getActivity() instanceof MainActivity){
+                        Intent intent = new Intent(getActivity(), WeatherActivity.class);//getActivity方法可获取到该fragment所处的activity
+                        intent.putExtra("weather_id", weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                    }else if (getActivity() instanceof WeatherActivity){
+                        WeatherActivity activity = (WeatherActivity) getActivity();
+                        activity.drawerLayout.closeDrawers();
+                        activity.swipeRefreshLayout.setRefreshing(true);
+                        activity.requestWeather(weatherId);
+                    }
                 }
             }
         });
